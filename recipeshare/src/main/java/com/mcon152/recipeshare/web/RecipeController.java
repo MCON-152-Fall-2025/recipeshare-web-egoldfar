@@ -1,6 +1,7 @@
 package com.mcon152.recipeshare.web;
 
 import com.mcon152.recipeshare.Recipe;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -13,7 +14,9 @@ public class RecipeController {
     private final List<Recipe> recipes = new ArrayList<>();
 
     private final AtomicLong counter = new AtomicLong();
-    RecipeController() {}
+
+    RecipeController() {
+    }
 
     /**
      * Adds a new recipe to the list.
@@ -45,13 +48,13 @@ public class RecipeController {
      * @return the recipe with the specified ID, or null if not found
      */
     @GetMapping("/{id}")
-    public Recipe getRecipeById(@PathVariable long id) {
+    public ResponseEntity<Recipe> getRecipeById(@PathVariable long id) {
         for (Recipe recipe : recipes) {
             if (recipe.getId() == id) {
-                return recipe;
+                return ResponseEntity.ok(recipe);
             }
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
     /**
@@ -61,36 +64,65 @@ public class RecipeController {
      * @return true if the recipe was deleted, false if not found
      */
     @DeleteMapping("/{id}")
-    public boolean deleteRecipe(@PathVariable long id) {
+    public ResponseEntity<Object> deleteRecipe(@PathVariable long id) {
         for (int i = 0; i < recipes.size(); i++) {
             if (recipes.get(i).getId() == id) {
                 recipes.remove(i);
-                return true;
+                return ResponseEntity.noContent().build();
             }
         }
-        return false;
+        return ResponseEntity.notFound().build();
     }
+
     /**
      * Updates an existing recipe by its ID.
      *
-     * @param id the ID of the recipe to update
+     * @param id            the ID of the recipe to update
      * @param updatedRecipe the updated recipe data
      * @return the updated recipe, or null if not found
      */
     @PutMapping("/{id}")
-    public Recipe updateRecipe(@PathVariable long id, @RequestBody Recipe updatedRecipe) {
-        throw new UnsupportedOperationException("Update recipe not implemented");
+    public ResponseEntity<Object> updateRecipe(@PathVariable long id, @RequestBody Recipe updatedRecipe) {
+        for (int i = 0; i < recipes.size(); i++) {
+            if (recipes.get(i).getId() == id) {
+                recipes.set(i, updatedRecipe);
+                return ResponseEntity.ok(recipes.get(i));
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 
     /**
      * Partially updates an existing recipe by its ID.
      *
-     * @param id the ID of the recipe to update
+     * @param id            the ID of the recipe to update
      * @param partialRecipe the partial recipe data to update
      * @return the updated recipe, or null if not found
      */
     @PatchMapping("/{id}")
-    public Recipe patchRecipe(@PathVariable long id, @RequestBody Recipe partialRecipe) {
-        throw new UnsupportedOperationException("Update recipe not implemented");
+    public ResponseEntity<Object> patchRecipe(@PathVariable long id, @RequestBody Recipe partialRecipe) {
+        for (int i = 0; i < recipes.size(); i++) {
+            if (recipes.get(i).getId() == id) {
+                Recipe recipe = recipes.get(i);
+                if (partialRecipe.getId() != null) {
+                    recipe.setId(partialRecipe.getId());
+                }
+                if (partialRecipe.getTitle() != null) {
+                    recipe.setTitle(partialRecipe.getTitle());
+                }
+                if (partialRecipe.getDescription() != null) {
+                    recipe.setDescription(partialRecipe.getDescription());
+                }
+                if (partialRecipe.getIngredients() != null) {
+                    recipe.setIngredients(partialRecipe.getIngredients());
+                }
+                if (partialRecipe.getInstructions() != null) {
+                    recipe.setInstructions(partialRecipe.getInstructions());
+                }
+
+                return ResponseEntity.ok(recipes.get(i));
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 }
